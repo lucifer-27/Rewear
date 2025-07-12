@@ -1,5 +1,11 @@
 import type { Item } from './types';
 
+// This is dummy data for demonstration. 
+// To add your own images, you can replace the placeholder URLs below
+// with direct links to your own images hosted online.
+// For example, you could upload images to a service like Imgur or Cloudinary
+// and paste the links here.
+
 export const dummyItems: Item[] = [
   {
     id: '1',
@@ -7,7 +13,8 @@ export const dummyItems: Item[] = [
     category: 'Outerwear',
     condition: 'Good',
     brand: "Levi's",
-    images: ['https://placehold.co/600x800.png', 'https://placehold.co/601x801.png'],
+    // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1543087903-1ac237e2e54d?q=80&w=1887'],
     uploaderName: 'Jane Doe',
     points: 1500,
     originalPrice: 3000,
@@ -20,7 +27,8 @@ export const dummyItems: Item[] = [
     category: 'Dresses',
     condition: 'Like new',
     brand: 'Zara',
-    images: ['https://placehold.co/600x800.png', 'https://placehold.co/602x802.png'],
+    // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1887'],
     uploaderName: 'Sarah Smith',
     points: 1200,
     originalPrice: 2500,
@@ -33,7 +41,8 @@ export const dummyItems: Item[] = [
     category: 'Shoes',
     condition: 'Good',
     brand: 'Dr. Martens',
-    images: ['https://placehold.co/600x800.png'],
+     // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1608256246200-53e6357b1d2a?q=80&w=1887'],
     uploaderName: 'Mike Johnson',
     points: 2500,
     description: "Classic leather ankle boots with a sturdy sole. Some minor scuffs but in great overall condition with plenty of life left."
@@ -44,7 +53,8 @@ export const dummyItems: Item[] = [
     category: 'Tops',
     condition: 'New with tags',
     brand: 'Uniqlo',
-    images: ['https://placehold.co/600x800.png'],
+    // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?q=80&w=1887'],
     uploaderName: 'Emily Chen',
     points: 500,
     originalPrice: 1000,
@@ -57,7 +67,8 @@ export const dummyItems: Item[] = [
     category: 'Bottoms',
     condition: 'Good',
     brand: 'Topshop',
-    images: ['https://placehold.co/600x800.png'],
+    // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1604176354204-926873782855?q=80&w=1887'],
     uploaderName: 'Jane Doe',
     points: 900,
     description: "Comfortable and stylish high-waisted skinny jeans in a dark wash. Minimal signs of wear."
@@ -68,7 +79,8 @@ export const dummyItems: Item[] = [
     category: 'Accessories',
     condition: 'Like new',
     brand: 'Hermès',
-    images: ['https://placehold.co/600x800.png'],
+    // Replace this with your image URL
+    images: ['https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?q=80&w=1935'],
     uploaderName: 'Olivia Davis',
     points: 5000,
     originalPrice: 10000,

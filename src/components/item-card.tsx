@@ -30,17 +30,21 @@ function getImageHint(category: string) {
 
 export function ItemCard({ item }: ItemCardProps) {
   const imageHint = getImageHint(item.category);
+  // Ensure item.images is an array and has at least one image.
+  const imageUrl = (item.images && item.images.length > 0) ? item.images[0] : 'https://placehold.co/600x800.png';
+
   return (
     <Link href={`/item/${item.id}`} className="group block">
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
         <CardContent className="p-0">
           <div className="relative aspect-[3/4]">
             <Image
-              src={item.images[0]}
+              src={imageUrl}
               alt={item.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               data-ai-hint={imageHint}
+              unoptimized // Add this if you are using external image URLs from services like Unsplash
             />
           </div>
           <div className="space-y-2 p-4">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,10 +10,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, Loader2, Wand2 } from 'lucide-react'
-import { getValuation } from './actions'
+import { Upload, Loader2, Wand2, X } from 'lucide-react'
+import { getValuation, createItem } from './actions'
 import { useToast } from '@/hooks/use-toast'
 import { SmartValuationBadge } from '@/components/smart-valuation-badge'
+import { useAuth } from '@/context/auth-context'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long'),
@@ -30,7 +33,13 @@ export default function AddItemPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isValuating, setIsValuating] = useState(false)
   const [valuation, setValuation] = useState<{ suggestedPoints: number; originalPrice?: number } | null>(null)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const { toast } = useToast()
+  const { user } = useAuth()
+  const router = useRouter()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -40,6 +49,26 @@ export default function AddItemPage() {
       brand: '',
     },
   })
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length + imageFiles.length > 5) {
+      toast({
+        title: 'Too many images',
+        description: 'You can upload a maximum of 5 images.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setImageFiles(prev => [...prev, ...files]);
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleAutoValue = async () => {
     const { title, category } = form.getValues()
@@ -76,16 +105,62 @@ export default function AddItemPage() {
     }
   }
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setIsLoading(true)
-    console.log(data)
-    await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
-    toast({
-      title: 'Item Listed!',
-      description: 'Your item has been successfully listed for swapping.',
-    })
-    form.reset()
-    setValuation(null)
+  const onSubmit = async (data: FormValues) => {
+    if (!user) {
+        toast({
+            title: "Authentication Error",
+            description: "You must be logged in to list an item.",
+            variant: "destructive"
+        });
+        return;
+    }
+
+    if (imageFiles.length === 0) {
+      toast({
+        title: 'Missing Image',
+        description: 'Please upload at least one image for your item.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsLoading(true);
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined) {
+          formData.append(key, String(value));
+        }
+    });
+
+    if (valuation?.originalPrice) {
+      formData.append('originalPrice', String(valuation.originalPrice));
+    }
+    formData.append('valuationStatus', valuation ? 'auto' : 'manual');
+    
+    imageFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    const result = await createItem(formData, user.uid, user.displayName || 'Anonymous');
+
+    if (result.error) {
+      toast({
+        title: 'Error',
+        description: result.error,
+        variant: 'destructive',
+      })
+    } else {
+      toast({
+        title: 'Item Listed!',
+        description: 'Your item has been successfully listed for swapping.',
+      })
+      form.reset()
+      setValuation(null)
+      setImageFiles([])
+      setImagePreviews([])
+      router.push('/dashboard');
+    }
+
     setIsLoading(false)
   }
 
@@ -100,12 +175,41 @@ export default function AddItemPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid grid-cols-1 gap-4">
-                <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/50 bg-muted/20">
+                <div 
+                  className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/50 bg-muted/20 cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <div className="text-center">
                     <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
                     <p className="mt-2 text-sm text-muted-foreground">Drag & drop up to 5 images or click to upload</p>
+                    <Input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      multiple 
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
                   </div>
                 </div>
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {imagePreviews.map((src, index) => (
+                      <div key={index} className="relative aspect-square">
+                        <Image src={src} alt={`Preview ${index}`} fill className="rounded-md object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <FormField
@@ -229,9 +333,9 @@ export default function AddItemPage() {
               </div>
 
 
-              <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+              <Button type="submit" size="lg" className="w-full" disabled={isLoading || !user}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                List Item
+                {user ? 'List Item' : 'Please log in to list'}
               </Button>
             </form>
           </Form>

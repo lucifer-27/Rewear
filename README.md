@@ -10,3 +10,9 @@ Team Name: Team 4121
 Email: ansh.g.raval@gmail.com(Team Leader)
        panavpatel461906@gmail.com(Member)
        jyotjayswal268@gmail.com(Member)
+
+To run the app:
+1)open the terminal of IDE
+2) type npm install
+3)npm run build
+4)npm run dev

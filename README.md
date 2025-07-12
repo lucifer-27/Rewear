@@ -16,4 +16,4 @@ To run the app:
 2) type npm install
 3)npm run build
 4)npm run dev
-Video link : https://app.screencastify.com/watch/IIjXVBqA7F9RH46WJcsL
+Video link : https://app.screencastify.com/watch/HE4ZOYmC447LTDfkjiNc
